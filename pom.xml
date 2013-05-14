@@ -39,8 +39,6 @@
 
 	<build>
 	
-		<sourceDirectory>src/test/java</sourceDirectory>
-	
 	  	<!-- enable artifact deployment via scp -->
 		<extensions>
 			<extension>
