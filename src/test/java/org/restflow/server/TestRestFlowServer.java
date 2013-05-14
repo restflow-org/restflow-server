@@ -12,7 +12,13 @@ import org.springframework.util.Assert;
 
 public class TestRestFlowServer extends TestRestFlow {
 
+	public static String RestFlowServerInvocationCommand = "java -classpath target/classes" +
+			  System.getProperty("path.separator") + "target/test-classes" +
+			  System.getProperty("path.separator") + 
+			  "target/dependency/* org.restflow.RestFlowServer";
+	
 	static public class Server {
+		
 		int port = 0;
 		int magic = 0;
 		public int getPort() { return port; }
@@ -30,6 +36,7 @@ public class TestRestFlowServer extends TestRestFlow {
 			p = Runtime.getRuntime().exec(cmd);
 			init(p);
 		}
+		
 		void init(Process p) throws IOException {
 			BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			Assert.notNull(in, "Errors during executing the process");
@@ -52,8 +59,9 @@ public class TestRestFlowServer extends TestRestFlow {
 			assertTrue(magic != 0);
 			
 		}
+		
 		public void stop() throws IOException, InterruptedException {
-			verifyRunRegexp(RestFlowInvocationCommand + " -c " + port + " --server-secret " + magic +
+			verifyRunRegexp(RestFlowServerInvocationCommand + " -c " + port + " --server-secret " + magic +
 					" --server-stop", 
 					"",
 					"",
@@ -73,17 +81,17 @@ public class TestRestFlowServer extends TestRestFlow {
 
 		
 	public void testServerShellsAndWatchDog() throws IOException, InterruptedException {
-		verifyRunRegexp(RestFlowInvocationCommand + " -s --server-idle-timeout 1",
+		verifyRunRegexp(RestFlowServerInvocationCommand + " -s --server-idle-timeout 1",
 				  "",
 				  ".*export RESTFLOW_SERVER_PORT=.*DONE.*Server stopped due to watch-dog timeout.*",
 				  "");
 
-		verifyRunRegexp(RestFlowInvocationCommand + " -s --server-idle-timeout 1 --server-shell TCSH",
+		verifyRunRegexp(RestFlowServerInvocationCommand + " -s --server-idle-timeout 1 --server-shell TCSH",
 				  "",
 				  ".*setenv RESTFLOW_SERVER_PORT .*DONE.*Server stopped due to watch-dog timeout.*",
 				  "");
 
-		verifyRunRegexp(RestFlowInvocationCommand + " -s --server-idle-timeout 1 --server-shell WIN_CMD",
+		verifyRunRegexp(RestFlowServerInvocationCommand + " -s --server-idle-timeout 1 --server-shell WIN_CMD",
 				  "",
 				  ".*SET RESTFLOW_SERVER_PORT=.*DONE.*Server stopped due to watch-dog timeout.*",
 				  "");
@@ -92,13 +100,13 @@ public class TestRestFlowServer extends TestRestFlow {
 	public void testStartStopServer() throws IOException, InterruptedException {
 		// Test if start-stop gets the same port, ie if the first start releases the port correctly
 		int port;
-		{ Server s = new Server(RestFlowInvocationCommand + " -s --server-secret");
+		{ Server s = new Server(RestFlowServerInvocationCommand + " -s --server-secret");
 		  port = s.getPort();
 		  System.out.println(s.getPort());
 		  s.stop();
 		}
 		{
-		  Server s = new Server(RestFlowInvocationCommand + " -s --server-secret");
+		  Server s = new Server(RestFlowServerInvocationCommand + " -s --server-secret");
 		  assertEquals(port, s.getPort());
 		  System.out.println(s.getPort());
 		  s.stop();
@@ -106,10 +114,10 @@ public class TestRestFlowServer extends TestRestFlow {
 	}
 
 	public void testServerExecution() throws IOException, InterruptedException {
-		Server s = new Server(RestFlowInvocationCommand + " -s --server-secret");
+		Server s = new Server(RestFlowServerInvocationCommand + " -s --server-secret");
 		
-		String saveExec = RestFlowInvocationCommand;
-		RestFlowInvocationCommand += " -c " +  s.getPort() + " --server-secret " + s.getMagic();
+		String saveExec = RestFlowServerInvocationCommand;
+		RestFlowServerInvocationCommand += " -c " +  s.getPort() + " --server-secret " + s.getMagic();
 		
 		
 		{
@@ -132,15 +140,15 @@ public class TestRestFlowServer extends TestRestFlow {
 			testWrongOption();
 		}
 		
-		RestFlowInvocationCommand = saveExec;
+		RestFlowServerInvocationCommand = saveExec;
 		s.stop();
 	}
 	
 	public void testServerRegression() throws IOException, InterruptedException {
-		Server s = new Server(RestFlowInvocationCommand + " -s --server-secret");
+		Server s = new Server(RestFlowServerInvocationCommand + " -s --server-secret");
 		
-		String saveExec = RestFlowInvocationCommand;
-		RestFlowInvocationCommand += " -c " +  s.getPort() + " --server-secret " + s.getMagic();
+		String saveExec = RestFlowServerInvocationCommand;
+		RestFlowServerInvocationCommand += " -c " +  s.getPort() + " --server-secret " + s.getMagic();
 		
 		testClassPath();
 		for(int i = 0; i < 10; ++i) {
@@ -162,23 +170,23 @@ public class TestRestFlowServer extends TestRestFlow {
 			testWrongOption();
 		}
 		
-		RestFlowInvocationCommand = saveExec;
+		RestFlowServerInvocationCommand = saveExec;
 		s.stop();
 	}
 
 	public void testServerRestartExecution() throws IOException, InterruptedException {
-		String[] cmd_exec = RestFlowInvocationCommand.replaceAll("([^\\\\]) ", "$1__SPLIT_tV5AUkJ36DnlDdbN5I94_HERE__").split("__SPLIT_tV5AUkJ36DnlDdbN5I94_HERE__");
+		String[] cmd_exec = RestFlowServerInvocationCommand.replaceAll("([^\\\\]) ", "$1__SPLIT_tV5AUkJ36DnlDdbN5I94_HERE__").split("__SPLIT_tV5AUkJ36DnlDdbN5I94_HERE__");
 		ArrayList<String> serverCommandLine = new ArrayList<String>();
 		serverCommandLine.addAll(java.util.Arrays.asList(cmd_exec));
 		serverCommandLine.addAll(java.util.Arrays.asList(
 				"-s", "--server-secret", "--server-restart-name"));
-		serverCommandLine.add(RestFlowInvocationCommand);
+		serverCommandLine.add(RestFlowServerInvocationCommand);
 
 		String[] asAStringArray = new String[0];
 		Server s = new Server(serverCommandLine.toArray(asAStringArray));
 
-		String saveExec = RestFlowInvocationCommand;
-		RestFlowInvocationCommand += " -c " +  s.getPort() + " --server-secret " + s.getMagic();
+		String saveExec = RestFlowServerInvocationCommand;
+		RestFlowServerInvocationCommand += " -c " +  s.getPort() + " --server-secret " + s.getMagic();
 		
 		for(int i = 0; i < 4; ++i) {
 			testHelloWorld();
@@ -193,14 +201,42 @@ public class TestRestFlowServer extends TestRestFlow {
 //				// OK. Class is loaded already :)
 //			}
 			
-			verifyRunRegexp(RestFlowInvocationCommand + " --server-restart",
+			verifyRunRegexp(RestFlowServerInvocationCommand + " --server-restart",
 					"",
 					".*Starting new Restflow server.*",
 					"");
 			Thread.sleep(300);
 		}
 		
-		RestFlowInvocationCommand = saveExec;
+		RestFlowServerInvocationCommand = saveExec;
 		s.stop();
+	}
+	
+	public void testHelp_OutputDetails() throws IOException, InterruptedException {
+		verifyRunExact(RestFlowServerInvocationCommand + " -h",
+			"", 
+				"Option                                  Description                            " + EOL +
+				"------                                  -----------                            " + EOL +
+				"-?, -h                                  show help                              " + EOL +
+				"-c, --client [Integer: remote port]     start as client (default: 0)           " + EOL +
+				"--cp <jar|directory>                    add to classpath                       " + EOL +
+				"-s, --server [Integer: listen port]     start as server (default: 0)           " + EOL +
+				"--server-idle-timeout [Integer:         The server will terminate itself if    " + EOL +
+				"  seconds]                                not used by a client for this time   " + EOL +
+				"                                          span. (default: 3600)                " + EOL +
+				"--server-loop <Integer: num>            number of clients to be served before  " + EOL +
+				"                                          exit.                                " + EOL +
+				"--server-name [hostname]                server to connect to (default:         " + EOL +
+				"                                          localhost)                           " + EOL +
+				"--server-restart                        restart RestFlow server                " + EOL +
+				"--server-restart-name [RestFlow         restart RestFlow server (default:      " + EOL +
+				"  executable]                             RestFlow)                            " + EOL +
+				"--server-secret [Integer: secret]       Simple challenge-response secret. If   " + EOL +
+				"                                          no secret is specified, a random     " + EOL +
+				"                                          number is used.                      " + EOL +
+				"--server-shell [BASH|TCSH|WIN_CMD]      format for environmental variables     " + EOL +
+				"                                          (default: BASH)                      " + EOL +
+				"--server-stop                           stop RestFlow server                   " + EOL,
+			"");
 	}
 }
