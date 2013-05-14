@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import org.restflow.RestFlow;
+import org.restflow.RestFlowServer;
 
 
 public class Server {
@@ -197,7 +198,7 @@ public class Server {
 					// command-line parameter
 					int exit_val = 0;
 					try {
-						RestFlow.main(new_args);
+						RestFlowServer.main(new_args);
 					} catch (StopServerException e) {
 						clientctl_out.writeInt(exit_val);
 						clientctl_out.flush();
