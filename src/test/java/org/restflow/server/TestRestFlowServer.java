@@ -135,7 +135,7 @@ public class TestRestFlowServer extends TestRestFlow {
 			
 			testHelloWorldInputFromStdin();
 			testHelp_OutputDetails();
-			testInput();
+			testWorkflowInputs();
 			testTrace();
 			testWrongOption();
 		}
@@ -165,7 +165,7 @@ public class TestRestFlowServer extends TestRestFlow {
 			
 			testHelloWorldInputFromStdin();
 			testHelp_OutputDetails();
-			testInput();
+			testWorkflowInputs();
 			testTrace();
 			testWrongOption();
 		}
