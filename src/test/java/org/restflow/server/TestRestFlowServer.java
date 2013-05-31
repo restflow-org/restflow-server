@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.restflow.test.system.TestRestFlow;
+import org.restflow.TestRestFlow;
 import org.restflow.util.PortableIO;
 import org.springframework.util.Assert;
 
